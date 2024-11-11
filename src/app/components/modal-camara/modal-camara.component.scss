@@ -1,0 +1,48 @@
+ion-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  ion-button {
+    width: 60%; /* Botón ajustado al 80% del ancho del contenedor */
+    margin-bottom: 1rem;
+  }
+  
+  .camara {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* Ocupa toda la altura de ion-content */
+  }
+
+  .video-container, .image-preview {
+    display: flex;
+    justify-content: center;
+    width: 100%; /* Contenedor de video o imagen ajustado al 80% del ancho */
+    max-height: 80%; /* Limitar la altura al 80% de la pantalla */
+    margin-top: 1rem;
+  }
+  
+  video {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  
+  .image-preview img {
+    width: 80%; /* Ajustar la imagen al ancho del contenedor */
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .loading {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
