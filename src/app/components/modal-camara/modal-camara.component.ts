@@ -19,6 +19,7 @@ export class ModalCamaraComponent implements AfterViewInit, OnDestroy {
   imageUrl: string | undefined;
   isDesktop: boolean;
   videoStreamActive = false;
+  cameraPermissionDenied = false; // Nuevo estado para los permisos
   private videoStream: MediaStream | null = null;
 
   @ViewChild('video', { static: false }) video!: ElementRef<HTMLVideoElement>;
@@ -60,6 +61,7 @@ export class ModalCamaraComponent implements AfterViewInit, OnDestroy {
         video: true,
       });
       this.videoStreamActive = true;
+      this.cameraPermissionDenied = false; // Si tenemos acceso, restablecemos el estado
       this.video.nativeElement.srcObject = this.videoStream;
 
       // Captura una imagen luego de una breve pausa solo en escritorio
@@ -71,6 +73,7 @@ export class ModalCamaraComponent implements AfterViewInit, OnDestroy {
         this.captureImageFromVideo(); // En móvil, tomar la foto directamente
       }
     } catch (error) {
+      this.cameraPermissionDenied = true;
       console.error('Error accediendo a la cámara:', error);
     }
   }

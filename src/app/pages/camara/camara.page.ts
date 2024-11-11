@@ -6,7 +6,8 @@ import { TabService } from '../../services/tab.service';
 import { HttpClient } from '@angular/common/http';
 
 import { ModalController } from '@ionic/angular';
-import {ModalCamaraComponent} from "../../components/modal-camara/modal-camara.component";
+import { ModalCamaraComponent } from "../../components/modal-camara/modal-camara.component";
+import { ChangeDetectorRef } from '@angular/core';
 
 interface Photo {
   _id: string;  // El id de la foto
@@ -35,6 +36,7 @@ export class CamaraPage implements OnInit, OnDestroy {
     private router: Router, // Router para redireccionar
     public tabService: TabService,
     private http: HttpClient,
+    private cdRef: ChangeDetectorRef
   ) {
     // Inicializar el nombre del usuario y el estado de autenticación
     this.userName = this.authService.getUserName(); // Método para obtener el nombre del usuario
@@ -74,6 +76,12 @@ export class CamaraPage implements OnInit, OnDestroy {
       if (result.data) {
         // Agregar la foto capturada al array de fotos
         this.photos.push(result.data);
+
+        // Forzar la detección de cambios
+        this.cdRef.detectChanges(); // Fuerza la actualización de la vista
+
+        // Actualizar las fotos desde la base de datos
+        this.loadPhotos();
       }
     });
 
@@ -87,7 +95,7 @@ export class CamaraPage implements OnInit, OnDestroy {
     }, error => {
       console.error('Error al cargar las fotos', error);
     });
-  }  
+  }
 
   deletePhoto(photoId: string) {
     this.http.delete(`https://mob-uteq-api.vercel.app/api/photo/photos/${photoId}`).subscribe(
@@ -99,7 +107,7 @@ export class CamaraPage implements OnInit, OnDestroy {
         console.error('Error al eliminar la foto', error);
       }
     );
-  }  
+  }
 
   ngOnDestroy() {
     // Cancelar la suscripción para evitar fugas de memoria
