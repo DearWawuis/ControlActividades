@@ -19,7 +19,7 @@ export class ModalCamaraComponent implements AfterViewInit, OnDestroy {
   imageUrl: string | undefined;
   isDesktop: boolean;
   videoStreamActive = false;
-  cameraPermissionDenied = false; // Nuevo estado para los permisos
+  cameraPermissionDenied = false; // Nuevo estado para los permisoss
   private videoStream: MediaStream | null = null;
 
   @ViewChild('video', { static: false }) video!: ElementRef<HTMLVideoElement>;
