@@ -3,6 +3,11 @@ import { AuthService } from '../../services/auth.service';
 import { Router, NavigationEnd } from '@angular/router'; // Importa Router para redireccionar
 import { Subscription } from 'rxjs';
 import { ModalController } from '@ionic/angular';
+import { NavController } from '@ionic/angular';
+import { CrearProyectoModalComponent } from 'src/app/components/crear-proyecto-modal/crear-proyecto-modal.component';
+import { ProyectoService } from '../../services/proyecto.service';
+import Swiper from 'swiper';
+
 
 import { TabService } from '../../services/tab.service';
 
@@ -19,13 +24,20 @@ export class HomePage implements OnInit, OnDestroy {
   isLoggedIn: boolean = false;
   userName: string; // Variable para almacenar el nombre del usuario
   userId: number;
+  proyectos: any[] = []; // Array para almacenar los proyectos
+  proyectosCompletados: any[] = [];
+  swiper: any;
+  currentIndex = 0;
   private routerSubscription!: Subscription; // Suscripción a eventos de navegación
 
 
   constructor(
+    private navCtrl: NavController,
     private authService: AuthService, // Servicio de autenticación
     private router: Router, // Router para redireccionar
     public tabService: TabService,
+    private modalController: ModalController,
+    private proyectoService: ProyectoService
   ) {
     // Inicializar el nombre del usuario y el estado de autenticación
     this.userName = this.authService.getUserName(); // Método para obtener el nombre del usuario
@@ -36,6 +48,8 @@ export class HomePage implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadUserData(); //Cargar datos del usuario
     this.subscribeToRouterEvents();
+    this.proyectos = this.proyectoService.obtenerProyectos();
+    this.proyectosCompletados = this.proyectoService.getProyectosCompletados();
   }
 
   // Carga datos del usuario
@@ -55,11 +69,53 @@ export class HomePage implements OnInit, OnDestroy {
     });
   }
 
+  cargarProyectos() {
+    this.proyectos = this.proyectoService.obtenerProyectos();
+  }
+
   ngOnDestroy() {
     // Cancelar la suscripción para evitar fugas de memoria
     if (this.routerSubscription) {
       this.routerSubscription.unsubscribe();
     }
+  }
+
+  ngAfterViewInit() {
+    this.swiper = new Swiper('.swiper-container', {
+      slidesPerView: 1,         // Muestra un slide a la vez
+      spaceBetween: 10,         // Espacio entre slides
+      navigation: {             // Opciones de navegación (botones)
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+    });
+  }
+
+  nextSlide() {
+    this.currentIndex = (this.currentIndex + 1) % this.proyectos.length;
+  }
+
+  prevSlide() {
+    this.currentIndex = (this.currentIndex - 1 + this.proyectos.length) % this.proyectos.length;
+  }
+
+  async abrirModalCrearProyecto() {
+    const modal = await this.modalController.create({
+      component: CrearProyectoModalComponent,
+    });
+  
+    modal.onDidDismiss().then(() => {
+      this.cargarProyectos();
+    });
+  
+    return await modal.present();
+  }
+
+  // Función para ver los detalles de un proyecto
+  verDetalles(proyecto: any) {
+    this.navCtrl.navigateForward('/proyecto-detalle', {
+      state: { proyecto: proyecto } // Pasando el proyecto a la nueva página
+    });
   }
 
   // Método para cerrar sesión

@@ -89,7 +89,7 @@ export class CamaraPage implements OnInit, OnDestroy {
   }
 
   loadPhotos() {
-    this.http.get<Photo[]>('https://mob-uteq-api.vercel.app/api/photo/photos').subscribe((photos) => {
+    this.http.get<Photo[]>('https://api-dpdi.vercel.app/api/photo/photos').subscribe((photos) => {
       // Extraer solo las imágenes en Base64
       this.photos = photos;
     }, error => {
@@ -98,7 +98,7 @@ export class CamaraPage implements OnInit, OnDestroy {
   }
 
   deletePhoto(photoId: string) {
-    this.http.delete(`https://mob-uteq-api.vercel.app/api/photo/photos/${photoId}`).subscribe(
+    this.http.delete(`https://api-dpdi.vercel.app/api/photo/photos/${photoId}`).subscribe(
       () => {
         // Si la eliminación fue exitosa, eliminamos la foto del array local
         this.photos = this.photos.filter(photo => photo._id !== photoId);

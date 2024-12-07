@@ -120,7 +120,7 @@ export class ModalCamaraComponent implements AfterViewInit, OnDestroy {
       photo: image,  // La imagen en base64
     };
 
-    this.http.post('https://mob-uteq-api.vercel.app/api/photo/photos', photoData).subscribe(response => {
+    this.http.post('https://api-dpdi.vercel.app/api/photo/photos', photoData).subscribe(response => {
       console.log('Foto guardada con éxito', response);
     }, error => {
       console.error('Error al guardar la foto', error);

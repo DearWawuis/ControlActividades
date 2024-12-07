@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="regresar()">Volver</ion-button>
+    </ion-buttons>
+    <ion-title>{{ proyecto.nombre }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>{{ proyecto.nombre }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>{{ proyecto.descripcion }}</p>
+
+      <ion-list>
+        <ion-item *ngFor="let tarea of proyecto.tareas; let i = index">
+          <ion-label>
+            <h3>{{ tarea.nombre }}</h3>
+            <p><strong>Responsable:</strong> {{ tarea.responsable }}</p>
+          </ion-label>
+          <ion-checkbox slot="end" [(ngModel)]="tarea.completada" (ionChange)="marcarTareaCompletada(i)"></ion-checkbox>
+        </ion-item>
+      </ion-list>
+
+      <ion-button expand="block" color="primary" (click)="guardarProyectoCompletado()">Proyecto Completado</ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

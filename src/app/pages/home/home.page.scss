@@ -43,6 +43,67 @@ full-calendar {
     width: 100%; /* Aseguramos que el calendario use todo el espacio disponible */
 }
 
+.slider {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin-top: 20px;
+}
+
+.slide {
+  display: none;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.slide.active {
+  display: block;
+}
+
+.project-card {
+  width: 100vw; /* El 90% del ancho de la pantalla */
+  max-width: 500px; /* Limitar el tamaño máximo */
+  height: 300px; /* Definir una altura fija para el card */
+  margin: 0 auto; /* Centrar el card horizontalmente */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Sombra para profundidad */
+  text-align: center; /* Asegura que el contenido dentro del card se centre */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centrar el contenido dentro del card */
+}
+
+.project-card ion-card-header,
+.project-card ion-card-content {
+  padding: 0 16px; /* Ajustar el padding para que el contenido quede centrado */
+}
+
+.slider-buttons {
+  display: flex;
+  justify-content: space-between;
+  width: 90vw;
+  max-width: 500px;
+  margin-top: 20px;
+}
+
+.slider-button {
+  width: 45%; /* Los botones ocupan el 45% del ancho */
+}
+
+.slider-button-prev {
+  background-color: #3880ff;
+}
+
+.slider-button-next {
+  background-color: #3880ff;
+}
+
+h2 {
+  color: #000;
+}
+
 /* Para dispositivos con un ancho mayor a 768px (desktop) */
 @media screen and (min-width: 769px) {
     .calendar-container {

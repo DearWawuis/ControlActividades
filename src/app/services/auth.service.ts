@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 })
 export class AuthService {
   private user: { id: number; name: string } | null = null; // Almacena la información del usuario
-  private API_URL = 'https://mob-uteq-api.vercel.app/api';  // Url del backend
+  private API_URL = 'https://api-dpdi.vercel.app/api';  // Url del backend
   //private API_URL = 'http://localhost:3000/api';  // Cambia esto por el URL de tu backend
 
   constructor(private http: HttpClient, private router: Router) {

@@ -1,0 +1,70 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Crear Proyecto</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarModal()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label position="stacked">Nombre del Proyecto</ion-label>
+          <ion-input [(ngModel)]="proyecto.nombre" placeholder="Ingresa el nombre"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Descripción</ion-label>
+          <ion-textarea [(ngModel)]="proyecto.descripcion" placeholder="Descripción opcional"></ion-textarea>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+    <!-- Lista de Tareas -->
+    <ion-row>
+      <ion-col>
+        <ion-list>
+          <ion-item *ngFor="let tarea of tareas; let i = index">
+            <ion-label>
+              <h3>{{ tarea.nombre }}</h3>
+              <p>{{ tarea.responsable || 'Sin responsable' }}</p>
+            </ion-label>
+            <ion-buttons slot="end">
+              <ion-button color="danger" (click)="eliminarTarea(i)">
+                <ion-icon name="trash-outline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-item>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+
+    <!-- Agregar Tarea -->
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label position="stacked">Nueva Tarea</ion-label>
+          <ion-input [(ngModel)]="nuevaTarea.nombre" placeholder="Nombre de la tarea"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Responsable</ion-label>
+          <ion-select [(ngModel)]="nuevaTarea.responsable" placeholder="Seleccionar responsable">
+            <ion-select-option *ngFor="let usuario of usuarios" [value]="usuario">{{ usuario }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-button expand="block" (click)="agregarTarea()">Agregar Tarea</ion-button>
+      </ion-col>
+    </ion-row>
+
+    <!-- Botón de Guardar -->
+    <ion-row>
+      <ion-col>
+        <ion-button expand="block" color="primary" (click)="guardarProyecto()">Guardar Proyecto</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
