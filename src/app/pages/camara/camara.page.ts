@@ -14,6 +14,11 @@ interface Photo {
   image: string; // La imagen en base64
 }
 
+interface Video {
+  _id: string; // ID del video
+  url: string; // URL del video
+}
+
 @Component({
   selector: 'app-camara',
   templateUrl: './camara.page.html',
@@ -27,6 +32,7 @@ export class CamaraPage implements OnInit, OnDestroy {
   userName: string; // Variable para almacenar el nombre del usuario
   userId: number;
   photos: Photo[] = []; // Array para almacenar las fotos capturadas
+  videos: Video[] = [];
   private routerSubscription!: Subscription; // Suscripción a eventos de navegación
 
 
@@ -47,6 +53,7 @@ export class CamaraPage implements OnInit, OnDestroy {
     this.loadUserData(); //Cargar datos del usuario
     this.subscribeToRouterEvents();
     this.loadPhotos();
+    this.loadVideos();
   }
 
   // Carga datos del usuario
@@ -88,6 +95,41 @@ export class CamaraPage implements OnInit, OnDestroy {
     return await modal.present();
   }
 
+  // Método para abrir el modal de grabación de video
+  async openVideoModal() {
+    const modal = await this.modalController.create({
+      component: ModalCamaraComponent, // Usa el mismo componente o uno diferente si es necesario
+      componentProps: { mode: 'video' }, // Pasa un modo de 'video' para distinguir la funcionalidad
+    });
+
+    modal.onDidDismiss().then((result) => {
+      if (result.data) {
+        // Agregar el video grabado al array de videos
+        this.videos.push(result.data);
+
+        // Forzar la detección de cambios
+        this.cdRef.detectChanges();
+
+        // Cargar los videos desde la base de datos
+        this.loadVideos();
+      }
+    });
+
+    return await modal.present();
+  }
+
+  // Método para cargar los videos desde la API
+  loadVideos() {
+    this.http.get<Video[]>('https://api-dpdi.vercel.app/api/video/videos').subscribe(
+      (videos) => {
+        this.videos = videos;
+      },
+      (error) => {
+        console.error('Error al cargar los videos', error);
+      }
+    );
+  }
+
   loadPhotos() {
     this.http.get<Photo[]>('https://api-dpdi.vercel.app/api/photo/photos').subscribe((photos) => {
       // Extraer solo las imágenes en Base64
@@ -95,6 +137,18 @@ export class CamaraPage implements OnInit, OnDestroy {
     }, error => {
       console.error('Error al cargar las fotos', error);
     });
+  }
+
+  // Método para eliminar un video
+  deleteVideo(videoId: string) {
+    this.http.delete(`https://api-dpdi.vercel.app/api/video/videos/${videoId}`).subscribe(
+      () => {
+        this.videos = this.videos.filter(video => video._id !== videoId);
+      },
+      (error) => {
+        console.error('Error al eliminar el video', error);
+      }
+    );
   }
 
   deletePhoto(photoId: string) {

@@ -30,6 +30,7 @@
   <!-- Contenedor para el botón -->
   <div class="button-container">
     <ion-button expand="block" (click)="openCameraModal()">Abrir Cámara</ion-button>
+    <ion-button expand="block" (click)="openVideoModal()">Grabar Video</ion-button>
   </div>
 
   <!-- Reel de fotos tomadas -->
@@ -42,6 +43,20 @@
         </ion-button>
         <!-- Imagen -->
         <img [src]="photo.image" alt="Foto tomada" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Reel de videos grabados -->
+  <div class="video-reel">
+    <div *ngFor="let video of videos" class="video">
+      <div class="video-wrapper">
+        <!-- Botón para eliminar el video -->
+        <ion-button fill="clear" color="danger" (click)="deleteVideo(video._id)" class="delete-button">
+          <ion-icon name="trash-outline"></ion-icon>
+        </ion-button>
+        <!-- Video -->
+        <video controls [src]="video.url" class="video-element"></video>
       </div>
     </div>
   </div>

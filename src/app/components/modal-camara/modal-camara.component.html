@@ -1,4 +1,3 @@
-<!-- camera-modal.component.html -->
 <ion-header>
   <ion-toolbar>
     <ion-title>Cámara</ion-title>
@@ -12,19 +11,30 @@
   <div class="camara">
     <ion-button expand="full" (click)="takePhoto()">Tomar Foto</ion-button>
 
-    <!-- Mostrar el video solo si la cámara está activa -->
+    <!-- Botón para iniciar/detener la grabación -->
+    <ion-button expand="full" (click)="toggleRecording()">
+      {{ isRecording ? 'Detener Grabación' : 'Grabar Video' }}
+    </ion-button>
+
+    <!-- Mostrar el video si la cámara está activa -->
     <div *ngIf="isDesktop && videoStreamActive">
       <video #video autoplay></video>
     </div>
 
     <!-- Indicador de carga si no hay permisos o aún no se ha activado el stream -->
-    <div *ngIf="cameraPermissionDenied && !videoStreamActive && !imageUrl" class="loading">
+    <div *ngIf="!videoStreamActive && !videoUrl" class="loading">
       <ion-spinner name="crescent"></ion-spinner>
       <p>Conectando a la cámara...</p>
     </div>
 
-    <div *ngIf="imageUrl" class="image-preview">
-      <img [src]="imageUrl" alt="Foto tomada" />
+    <!-- Mensaje de permisos denegados -->
+    <div *ngIf="cameraPermissionDenied && !videoStreamActive && !videoUrl" class="error">
+      <p>Permisos de cámara denegados. Por favor, habilítalos en la configuración.</p>
+    </div>
+
+    <!-- Vista previa del video grabado -->
+    <div *ngIf="videoUrl" class="video-preview">
+      <video [src]="videoUrl" controls></video>
     </div>
   </div>
 </ion-content>
