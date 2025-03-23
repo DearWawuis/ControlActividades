@@ -3,20 +3,23 @@ import { AuthService } from '../../services/auth.service';
 import { Router, NavigationEnd } from '@angular/router'; // Importa Router para redireccionar
 import { Subscription } from 'rxjs';
 import { TabService } from '../../services/tab.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { ModalController } from '@ionic/angular';
-import { ModalCamaraComponent } from "../../components/modal-camara/modal-camara.component";
+import { ModalCamaraComponent } from '../../components/modal-camara/modal-camara.component';
 import { ChangeDetectorRef } from '@angular/core';
+import { AlertController } from '@ionic/angular';
 
 interface Photo {
-  _id: string;  // El id de la foto
+  _id: string; // El id de la foto
   image: string; // La imagen en base64
+  userId: number;
 }
 
 interface Video {
   _id: string; // ID del video
   url: string; // URL del video
+  user: number;
 }
 
 @Component({
@@ -24,10 +27,9 @@ interface Video {
   templateUrl: './camara.page.html',
   styleUrls: ['./camara.page.scss'],
 })
-
 export class CamaraPage implements OnInit, OnDestroy {
-
   isProfileMenuOpen: boolean = false; // Controlar si el menú está abierto o cerrado
+  isSettingsExpanded: boolean = false;
   isLoggedIn: boolean = false;
   userName: string; // Variable para almacenar el nombre del usuario
   userId: number;
@@ -35,10 +37,10 @@ export class CamaraPage implements OnInit, OnDestroy {
   videos: Video[] = [];
   private routerSubscription!: Subscription; // Suscripción a eventos de navegación
 
-
   constructor(
     private modalController: ModalController,
     private authService: AuthService, // Servicio de autenticación
+    private alertController: AlertController,
     private router: Router, // Router para redireccionar
     public tabService: TabService,
     private http: HttpClient,
@@ -54,6 +56,25 @@ export class CamaraPage implements OnInit, OnDestroy {
     this.subscribeToRouterEvents();
     this.loadPhotos();
     this.loadVideos();
+    this.checkTokenValidity(); // Verifica la validez del token al cargar la página
+  }
+
+  async checkTokenValidity() {
+    const token = this.authService.getToken(); // Obtén el token del localStorage
+
+    if (token) {
+      // Verifica si el token es válido
+      const isValid = await this.authService.validateToken(token);
+
+      if (!isValid) {
+        // Si el token no es válido, elimínalo y redirige al usuario a la página de inicio de sesión
+        this.authService.logout();
+        this.router.navigate(['/login']);
+      }
+    } else {
+      // Si no hay token, redirige al usuario a la página de inicio de sesión
+      this.router.navigate(['/login']);
+    }
   }
 
   // Carga datos del usuario
@@ -120,47 +141,86 @@ export class CamaraPage implements OnInit, OnDestroy {
 
   // Método para cargar los videos desde la API
   loadVideos() {
-    this.http.get<Video[]>('https://api-dpdi.vercel.app/api/video/videos').subscribe(
-      (videos) => {
-        this.videos = videos;
-      },
-      (error) => {
-        console.error('Error al cargar los videos', error);
-      }
-    );
+    const token = this.authService.getToken(); // Obtén el token del localStorage
+
+    // Configura los headers con el token
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    this.http
+      .get<Video[]>(`https://api-dpdi.vercel.app/api/video/videos`, { headers })
+      .subscribe(
+        (videos) => {
+          this.videos = videos;
+        },
+        (error) => {
+          console.error('Error al cargar los videos', error);
+        }
+      );
   }
 
   loadPhotos() {
-    this.http.get<Photo[]>('https://api-dpdi.vercel.app/api/photo/photos').subscribe((photos) => {
-      // Extraer solo las imágenes en Base64
-      this.photos = photos;
-    }, error => {
-      console.error('Error al cargar las fotos', error);
+    const token = this.authService.getToken(); // Obtén el token del localStorage
+
+    // Configura los headers con el token
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
     });
+
+    this.http
+      .get<Photo[]>(`https://api-dpdi.vercel.app/api/photo/photos`, { headers })
+      .subscribe(
+        (photos) => {
+          // Extraer solo las imágenes en Base64
+          this.photos = photos;
+        },
+        (error) => {
+          console.error('Error al cargar las fotos', error);
+        }
+      );
   }
 
   // Método para eliminar un video
   deleteVideo(videoId: string) {
-    this.http.delete(`https://api-dpdi.vercel.app/api/video/videos/${videoId}`).subscribe(
-      () => {
-        this.videos = this.videos.filter(video => video._id !== videoId);
-      },
-      (error) => {
-        console.error('Error al eliminar el video', error);
-      }
-    );
+    const token = this.authService.getToken(); // Obtén el token del localStorage
+
+    // Configura los headers con el token
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    this.http
+      .delete(`https://api-dpdi.vercel.app/api/video/videos/${videoId}`, { headers })
+      .subscribe(
+        () => {
+          this.videos = this.videos.filter((video) => video._id !== videoId);
+        },
+        (error) => {
+          console.error('Error al eliminar el video', error);
+        }
+      );
   }
 
   deletePhoto(photoId: string) {
-    this.http.delete(`https://api-dpdi.vercel.app/api/photo/photos/${photoId}`).subscribe(
-      () => {
-        // Si la eliminación fue exitosa, eliminamos la foto del array local
-        this.photos = this.photos.filter(photo => photo._id !== photoId);
-      },
-      (error) => {
-        console.error('Error al eliminar la foto', error);
-      }
-    );
+    const token = this.authService.getToken(); // Obtén el token del localStorage
+
+    // Configura los headers con el token
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    this.http
+      .delete(`https://api-dpdi.vercel.app/api/photo/photos/${photoId}`, { headers })
+      .subscribe(
+        () => {
+          // Si la eliminación fue exitosa, eliminamos la foto del array local
+          this.photos = this.photos.filter((photo) => photo._id !== photoId);
+        },
+        (error) => {
+          console.error('Error al eliminar la foto', error);
+        }
+      );
   }
 
   ngOnDestroy() {
@@ -181,9 +241,48 @@ export class CamaraPage implements OnInit, OnDestroy {
     this.router.navigate(['/login']); // Redirigir a la página de inicio de sesión
   }
 
+  // Método para eliminar la cuenta
+  async deleteAccount() {
+    const alert = await this.alertController.create({
+      header: 'Eliminar cuenta',
+      message:
+        '¿Estás seguro de que deseas eliminar tu cuenta permanentemente? Esta acción no se puede deshacer.',
+      buttons: [
+        {
+          text: 'No',
+          role: 'cancel',
+          cssClass: 'secondary', // Estilo opcional para el botón "No"
+        },
+        {
+          text: 'Sí',
+          handler: () => {
+            this.confirmDeleteAccount(); // Llamar al método para eliminar la cuenta
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  // Método para confirmar la eliminación de la cuenta
+  confirmDeleteAccount() {
+    this.authService.deleteAccount().subscribe({
+      next: (response) => {
+        console.log('Cuenta eliminada:', response);
+        // Redirigir al usuario o realizar otras acciones
+        this.authService.logout(); // Cerrar sesión después de eliminar la cuenta
+      },
+      error: (err) => {
+        console.error('Error al eliminar la cuenta:', err);
+      },
+    });
+  }
+
   // Cerrar el menú de perfil
   closeProfileMenu() {
     this.isProfileMenuOpen = false;
+    this.isSettingsExpanded = false;
   }
 
   goToHomePage() {
@@ -205,5 +304,9 @@ export class CamaraPage implements OnInit, OnDestroy {
   toggleProfileMenu() {
     this.tabService.selectedTab = 'profile';
     this.isProfileMenuOpen = !this.isProfileMenuOpen;
+  }
+
+  toggleSettings() {
+    this.isSettingsExpanded = !this.isSettingsExpanded;
   }
 }

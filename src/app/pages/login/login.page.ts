@@ -21,12 +21,33 @@ export class LoginPage {
     });
   }
 
+  ngOnInit() {
+    this.checkAutoLogin(); // Verifica el inicio de sesión automático al cargar la página
+  }
+
+  async checkAutoLogin() {
+    const token = this.authService.getToken(); // Obtén el token del localStorage
+
+    if (token) {
+      // Verifica si el token es válido
+      const isValid = await this.authService.validateToken(token);
+
+      if (isValid) {
+        // Redirige al usuario a la página de inicio
+        this.router.navigate(['/home']);
+      } else {
+        // Si el token no es válido, elimínalo del localStorage
+        this.authService.logout();
+      }
+    }
+  }
+
   async onLogin() {
     if (this.loginForm.valid) {
       this.authService.login(this.loginForm.value).subscribe(
         response => {
           console.log('Login exitoso', response);
-          this.authService.handleLogin(response.user); // Guarda el usuario
+          this.authService.handleLogin(response); // Guarda el usuario
           this.showAlert('Inicio de sesión exitoso', 'Has iniciado sesión correctamente.'); // Muestra alerta de éxito
           this.router.navigate(['/home']); // Navegar a la página de inicio
         },

@@ -8,6 +8,7 @@ import {
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { ModalController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-modal-camara',
@@ -25,11 +26,13 @@ export class ModalCamaraComponent implements AfterViewInit, OnDestroy {
   private videoStream: MediaStream | null = null;
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
+  private userId: number;
 
   @ViewChild('video', { static: false }) video!: ElementRef<HTMLVideoElement>;
 
-  constructor(private modalController: ModalController, private http: HttpClient) {
+  constructor(private modalController: ModalController, private http: HttpClient, private authService: AuthService) {
     this.isDesktop = !this.isMobile();
+    this.userId = this.authService.getUserId();
   }
 
   ngAfterViewInit() {
@@ -199,14 +202,24 @@ export class ModalCamaraComponent implements AfterViewInit, OnDestroy {
   }
 
   savePhotoToDatabase(image: string) {
-    this.http.post('https://api-dpdi.vercel.app/api/photo/photos', { photo: image }).subscribe(
+    const photoData = {
+      photo: image,
+      userId: this.userId, // Incluye el userId en la solicitud
+    };
+
+    this.http.post('https://api-dpdi.vercel.app/api/photo/photos', photoData).subscribe(
       (response) => console.log('Foto guardada con éxito:', response),
       (error) => console.error('Error al guardar la foto:', error)
     );
   }
 
   saveVideoToDatabase(video: string) {
-    this.http.post('https://api-dpdi.vercel.app/api/video/videos', { video }).subscribe(
+    const videoData = {
+      video: video,
+      userId: this.userId, // Incluye el userId en la solicitud
+    };
+
+    this.http.post('https://api-dpdi.vercel.app/api/video/videos', videoData).subscribe(
       (response) => console.log('Video guardado con éxito:', response),
       (error) => console.error('Error al guardar el video:', error)
     );

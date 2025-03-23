@@ -3,13 +3,10 @@
     <ion-title>
       Camara
     </ion-title>
-    <img src="assets/images/Capibara.png" alt="Logo" class="img-logo mobile-only" />
+    <img src="assets/images/icon_logo.png" alt="Logo" class="img-logo mobile-only" />
     <ion-buttons slot="end" class="desktop-only">
       <ion-button (click)="goToHomePage()">
         Inicio
-      </ion-button>
-      <ion-button (click)="goToFavPage()">
-        Favoritos
       </ion-button>
       <ion-button (click)="goToCamPage()">
         Camara
@@ -72,10 +69,6 @@
         <ion-icon name="home-outline"></ion-icon>
         <ion-label>Inicio</ion-label>
       </ion-segment-button>
-      <ion-segment-button value="fav" (click)="goToFavPage()">
-        <ion-icon name="heart-outline"></ion-icon>
-        <ion-label>Favoritos</ion-label>
-      </ion-segment-button>
       <ion-segment-button value="cam" (click)="goToCamPage()">
         <ion-icon name="camera-outline"></ion-icon>
         <ion-label>Camara</ion-label>
@@ -94,9 +87,15 @@
         <ion-item>
           <ion-label>{{ userName }}</ion-label>
         </ion-item>
-        <ion-item>
+        <ion-item (click)="toggleSettings()">
           <ion-label>Configuración</ion-label>
+          <ion-icon [name]="isSettingsExpanded ? 'chevron-up' : 'chevron-down'"></ion-icon>
         </ion-item>
+        <ion-list *ngIf="isSettingsExpanded">
+          <ion-item (click)="deleteAccount()">
+            <ion-label color="danger">Eliminar cuenta</ion-label>
+          </ion-item>
+        </ion-list>
         <ion-item (click)="logout()">
           <ion-label>Cerrar sesión</ion-label>
         </ion-item>

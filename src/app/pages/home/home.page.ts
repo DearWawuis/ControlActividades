@@ -7,6 +7,7 @@ import { NavController } from '@ionic/angular';
 import { CrearProyectoModalComponent } from 'src/app/components/crear-proyecto-modal/crear-proyecto-modal.component';
 import { ProyectoService } from '../../services/proyecto.service';
 import Swiper from 'swiper';
+import { AlertController } from '@ionic/angular';
 
 
 import { TabService } from '../../services/tab.service';
@@ -21,6 +22,7 @@ import { TabService } from '../../services/tab.service';
 export class HomePage implements OnInit, OnDestroy {
 
   isProfileMenuOpen: boolean = false; // Controlar si el menú está abierto o cerrado
+  isSettingsExpanded: boolean = false;
   isLoggedIn: boolean = false;
   userName: string; // Variable para almacenar el nombre del usuario
   userId: number;
@@ -34,6 +36,7 @@ export class HomePage implements OnInit, OnDestroy {
   constructor(
     private navCtrl: NavController,
     private authService: AuthService, // Servicio de autenticación
+    private alertController: AlertController,
     private router: Router, // Router para redireccionar
     public tabService: TabService,
     private modalController: ModalController,
@@ -50,6 +53,25 @@ export class HomePage implements OnInit, OnDestroy {
     this.subscribeToRouterEvents();
     this.proyectos = this.proyectoService.obtenerProyectos();
     this.proyectosCompletados = this.proyectoService.getProyectosCompletados();
+    this.checkTokenValidity(); // Verifica la validez del token al cargar la página
+  }
+
+  async checkTokenValidity() {
+    const token = this.authService.getToken(); // Obtén el token del localStorage
+
+    if (token) {
+      // Verifica si el token es válido
+      const isValid = await this.authService.validateToken(token);
+
+      if (!isValid) {
+        // Si el token no es válido, elimínalo y redirige al usuario a la página de inicio de sesión
+        this.authService.logout();
+        this.router.navigate(['/login']);
+      }
+    } else {
+      // Si no hay token, redirige al usuario a la página de inicio de sesión
+      this.router.navigate(['/login']);
+    }
   }
 
   // Carga datos del usuario
@@ -129,9 +151,47 @@ export class HomePage implements OnInit, OnDestroy {
     this.router.navigate(['/login']); // Redirigir a la página de inicio de sesión
   }
 
+  // Método para eliminar la cuenta
+  async deleteAccount() {
+    const alert = await this.alertController.create({
+      header: 'Eliminar cuenta',
+      message: '¿Estás seguro de que deseas eliminar tu cuenta permanentemente? Esta acción no se puede deshacer.',
+      buttons: [
+        {
+          text: 'No',
+          role: 'cancel',
+          cssClass: 'secondary', // Estilo opcional para el botón "No"
+        },
+        {
+          text: 'Sí',
+          handler: () => {
+            this.confirmDeleteAccount(); // Llamar al método para eliminar la cuenta
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  // Método para confirmar la eliminación de la cuenta
+  confirmDeleteAccount() {
+    this.authService.deleteAccount().subscribe({
+      next: (response) => {
+        console.log('Cuenta eliminada:', response);
+        // Redirigir al usuario o realizar otras acciones
+        this.authService.logout(); // Cerrar sesión después de eliminar la cuenta
+      },
+      error: (err) => {
+        console.error('Error al eliminar la cuenta:', err);
+      },
+    });
+  }
+
   // Cerrar el menú de perfil
   closeProfileMenu() {
     this.isProfileMenuOpen = false;
+    this.isSettingsExpanded = false;
   }
 
   goToHomePage() {
@@ -152,5 +212,9 @@ export class HomePage implements OnInit, OnDestroy {
   toggleProfileMenu() {
     this.tabService.selectedTab = 'profile';
     this.isProfileMenuOpen = !this.isProfileMenuOpen;
+  }
+
+  toggleSettings() {
+    this.isSettingsExpanded = !this.isSettingsExpanded;
   }
 }
