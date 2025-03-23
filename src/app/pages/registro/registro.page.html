@@ -59,3 +59,29 @@
   </div>
   </div>
 </ion-content>
+
+<!-- Modal -->
+<div id="confirmationModal" class="modal" *ngIf="showModal">
+  <div class="modal-content">
+    <span class="close" (click)="closeModal()">&times;</span>
+    <h1>Aceptar Términos y Condiciones</h1>
+
+    <!-- Contenido del archivo privacidad.html -->
+    <iframe src="assets/privacidad.html" width="100%" height="300px"></iframe>
+
+    <!-- Opciones de aceptación -->
+    <div class="terms-container">
+      <label>
+        <input type="checkbox" id="acceptPolicies" [(ngModel)]="acceptPolicies" (change)="checkTerms()">
+        Acepto las políticas
+      </label>
+      <label>
+        <input type="checkbox" id="acceptPrivacy" [(ngModel)]="acceptPrivacy" (change)="checkTerms()">
+        Acepto el aviso de privacidad
+      </label>
+    </div>
+
+    <!-- Botón de Continuar (inicialmente deshabilitado) -->
+    <button id="continueButton" class="modal-button" [disabled]="!canContinue" (click)="continueRegistration()">Continuar</button>
+  </div>
+</div>

@@ -16,46 +16,86 @@ export class RegistroPage {
   confirmPasswordType: string = 'password';
   confirmPasswordIcon: string = 'eye-off';
 
-  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router, private alertController: AlertController) {
+  // Variables para la modal
+  showModal: boolean = false;
+  acceptPolicies: boolean = false;
+  acceptPrivacy: boolean = false;
+  canContinue: boolean = false;
+
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+    private alertController: AlertController
+  ) {
     this.registerForm = this.fb.group({
       name: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       password: [
-        '', 
+        '',
         [
           Validators.required,
           Validators.minLength(8),
-          Validators.pattern(/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/) // Al menos 1 mayúscula, 1 número y 1 carácter especial
-        ]
+          Validators.pattern(/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/), // Al menos 1 mayúscula, 1 número y 1 carácter especial
+        ],
       ],
-      confirmPassword: ['', [Validators.required]]
+      confirmPassword: ['', [Validators.required]],
+      acceptedPolicies: [true], // Campo obligatorio
+      acceptedPrivacy: [true], // Campo obligatorio
     });
   }
 
   async onRegister() {
     if (this.registerForm.valid) {
-      if (this.registerForm.value.password !== this.registerForm.value.confirmPassword) {
+      if (
+        this.registerForm.value.password !==
+        this.registerForm.value.confirmPassword
+      ) {
         this.showAlert('Error', 'Las contraseñas no coinciden.'); // Alerta si las contraseñas no coinciden
         return;
       }
-
-      this.authService.register(this.registerForm.value).subscribe( //Aqui se está utilizando la función "register" de nuestro archivo auth.service de \services
-        response => {
-          console.log('Registro exitoso', response);
-          this.showAlert('Registro exitoso', 'Revisa tu correo electrónico para activar tu cuenta.'); // Muestra alerta de éxito
-          this.router.navigate(['/login']); // Navegar a la página de login
-        },
-        error => {
-          console.error('Error en el registro', error);
-          this.handleRegisterError(error); // Manejar el error de registro
-        }
-      );
+      // Abrir la modal antes de continuar con el registro
+      this.openModal();
     } else {
       this.checkFormValidity(); // Llamar a la función para comprobar la validez del formulario
     }
   }
 
-  checkFormValidity() { //Aqui se hacen todas las validaciones de los inputs
+  // Métodos para la modal
+  openModal() {
+    this.showModal = true;
+  }
+
+  closeModal() {
+    this.showModal = false;
+  }
+
+  checkTerms() {
+    this.canContinue = this.acceptPolicies && this.acceptPrivacy;
+  }
+
+  continueRegistration() {
+    this.closeModal();
+
+    // Lógica para continuar con el registro
+    this.authService.register(this.registerForm.value).subscribe(
+      (response) => {
+        console.log('Registro exitoso', response);
+        this.showAlert(
+          'Registro exitoso',
+          'Revisa tu correo electrónico para activar tu cuenta.'
+        ); // Muestra alerta de éxito
+        this.router.navigate(['/login']); // Navegar a la página de login
+      },
+      (error) => {
+        console.error('Error en el registro', error);
+        this.handleRegisterError(error); // Manejar el error de registro
+      }
+    );
+  }
+
+  checkFormValidity() {
+    //Aqui se hacen todas las validaciones de los inputs
     if (this.registerForm.get('name')?.hasError('required')) {
       this.showAlert('Error', 'Rellena este campo: Nombre.');
     } else if (this.registerForm.get('email')?.hasError('required')) {
@@ -65,9 +105,15 @@ export class RegistroPage {
     } else if (this.registerForm.get('password')?.hasError('required')) {
       this.showAlert('Error', 'Rellena este campo: Contraseña.');
     } else if (this.registerForm.get('password')?.hasError('minlength')) {
-      this.showAlert('Error', 'La contraseña debe tener al menos 8 caracteres.');
+      this.showAlert(
+        'Error',
+        'La contraseña debe tener al menos 8 caracteres.'
+      );
     } else if (this.registerForm.get('password')?.hasError('pattern')) {
-      this.showAlert('Error', 'La contraseña debe tener al menos 1 mayúscula, 1 número y 1 carácter especial.');
+      this.showAlert(
+        'Error',
+        'La contraseña debe tener al menos 1 mayúscula, 1 número y 1 carácter especial.'
+      );
     } else if (this.registerForm.get('confirmPassword')?.hasError('required')) {
       this.showAlert('Error', 'Rellena este campo: Confirmar Contraseña.');
     }
@@ -77,26 +123,29 @@ export class RegistroPage {
     const alert = await this.alertController.create({
       header,
       message,
-      buttons: [{
-        text: 'OK',
-        role: 'confirm',
-        cssClass: 'alert-ok-button', // Añadir clase personalizada
-        handler: () => {
-          console.log('OK clicked');
-        }
-      }]
+      buttons: [
+        {
+          text: 'OK',
+          role: 'confirm',
+          cssClass: 'alert-ok-button', // Añadir clase personalizada
+          handler: () => {
+            console.log('OK clicked');
+          },
+        },
+      ],
     });
-  
+
     await alert.present();
-  
+
     // Agregar 'aria-label' manualmente usando querySelector
     const okButton = document.querySelector('.alert-ok-button');
     if (okButton) {
       okButton.setAttribute('aria-label', 'Cerrar alerta');
     }
-  }  
+  }
 
-  handleRegisterError(error: any) { //Método encargado de gestionar los errores que ocurren durante el registro
+  handleRegisterError(error: any) {
+    //Método encargado de gestionar los errores que ocurren durante el registro
     switch (error.status) {
       case 409:
         this.showAlert('Error', 'El correo ya está registrado.'); // Alerta si el correo ya está registrado
